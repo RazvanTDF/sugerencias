@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sugerencias — Fortaleza 1786</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+
+  :root {
+    --s: 1;              /* escala de la carta (auto-ajuste) */
+    --extra-gap: 0px;    /* espacio sobrante repartido entre secciones */
+    --ink: #1a1a1a;
+    --accent: #7d1f24;
+    --muted: #5b524a;
+    --dots: #8f8379;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #e9ecef;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ---------- TOOLBAR (no se imprime) ---------- */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .toolbar .title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    flex: 0 0 auto;
+  }
+
+  .toolbar .hint {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    opacity: 0.9;
+  }
+
+  .toolbar .buttons {
+    display: flex;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  .btn {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 8px 22px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-print {
+    background: #27ae60;
+    color: white;
+    font-size: 20px;
+    padding: 10px 28px;
+  }
+
+  .btn-clear {
+    background: #c0392b;
+    color: white;
+  }
+
+  .btn-style {
+    background: #8a6d3b;
+    color: white;
+  }
+
+  /* ---------- PÁGINA A4 ---------- */
+  .page {
+    width: 210mm;
+    height: 297mm;
+    margin: 20px auto;
+    background: white;
+    padding: 12mm 14mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Watermark con background-image + opacidad */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140%;
+    height: 80%;
+    background-image: url('logo.jpeg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page > * { position: relative; z-index: 2; }
+
+  /* Marco (sólo estilo pergamino) */
+  .page > .frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: none;
+    pointer-events: none;
+    color: var(--accent);
+  }
+  .frame .f-outer { fill: none; stroke: currentColor; stroke-width: 0.55; }
+  .frame .f-inner { fill: none; stroke: currentColor; stroke-width: 0.22; }
+  .frame .f-dot   { fill: currentColor; }
+
+  /* ---------- ESTILO PERGAMINO ---------- */
+  body.pergamino {
+    --ink: #2a1e14;
+    --accent: #7a1d22;
+    --muted: #6a5644;
+    --dots: #9c8a73;
+  }
+  body.pergamino .page {
+    padding: 15mm 19mm 14mm;
+    background-color: #f4ecda;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255,252,242,0.7), rgba(255,252,242,0) 70%),
+      radial-gradient(ellipse 45% 30% at 18% 22%, rgba(150,110,60,0.06), rgba(150,110,60,0) 100%),
+      radial-gradient(ellipse 40% 35% at 85% 70%, rgba(150,110,60,0.07), rgba(150,110,60,0) 100%),
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(140,100,50,0.2) 100%),
+      url('papel.png');
+  }
+  /* Logo sin fondo blanco (PNG transparente) */
+  body.pergamino .page::before {
+    background-image: url('logo-pergamino.png');
+    opacity: 0.08;
+  }
+  body.pergamino .page > .frame { display: block; }
+  .logo-perg { display: none; }
+  body.pergamino .logo-clasico { display: none; }
+  body.pergamino .logo-perg { display: block; }
+
+  /* ---------- HEADER ---------- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 4px;
+  }
+
+  .logo-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-img {
+    height: 68px;
+    width: auto;
+  }
+
+  .brand {
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--ink);
+  }
+
+  .qr-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .qr-box img { width: 58px; height: 58px; display: block; }
+
+  /* ---------- CAMPOS EDITABLES (común) ---------- */
+  .field {
+    font-family: 'Cormorant Garamond', serif;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: inherit;
+    border-radius: 4px;
+    padding: 1px 4px;
+    min-width: 0;
+    transition: background 0.15s;
+  }
+  .field:hover { background: rgba(245,245,245,0.7); }
+  .field:focus { background: #fff8dc; box-shadow: 0 0 0 2px #f39c12 inset; }
+  .field::placeholder { color: #c8c8c8; font-style: italic; -webkit-text-stroke: 0 transparent; }
+
+  /* ---------- TÍTULO ---------- */
+  .title-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .title-input {
+    width: 100%;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: 10px;
+    padding-left: 14px;   /* compensa el letter-spacing final */
+    color: var(--accent);
+  }
+
+  .subtitle-input {
+    width: 100%;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 23px;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 6px;
+    padding-left: 10px;   /* compensa el letter-spacing final */
+    margin-top: -6px;
+    color: var(--ink);
+  }
+
+  .divider {
+    width: 230px;
+    height: 18px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  .date-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 3px;
+  }
+
+  /* ---------- SECCIONES ---------- */
+  .menu-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 8px;
+  }
+
+  .menu-inner {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 156mm;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--s) * 16px + var(--extra-gap));
+  }
+
+  .section-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: calc(var(--s) * 4px);
+  }
+  .section-head .rule {
+    flex: 1;
+    height: 1px;
+    opacity: 0.6;
+  }
+  .section-head .rule-l { background: linear-gradient(to right, transparent, var(--accent)); }
+  .section-head .rule-r { background: linear-gradient(to left, transparent, var(--accent)); }
+
+  .section-title {
+    flex: 0 1 auto;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: calc(var(--s) * 22px);
+    font-weight: 700;
+    letter-spacing: 5px;
+    padding-left: 9px;   /* compensa el letter-spacing final */
+    color: var(--accent);
+  }
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--s) * 1px);
+  }
+
+  /* ---------- LÍNEA DE PLATO ---------- */
+  .line-row {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+  }
+
+  .name, .price, .unit {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: calc(var(--s) * 25px);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+    -webkit-text-stroke: 0.4px var(--ink);
+    text-rendering: geometricPrecision;
+  }
+
+  .name { flex: 0 1 auto; }
+
+  .leader {
+    flex: 1 1 auto;
+    min-width: 18px;
+    height: 3px;
+    margin: 0 6px;
+    transform: translateY(-3px);
+    background-image: radial-gradient(circle, var(--dots) 1.1px, transparent 1.5px);
+    background-size: 7px 3px;
+    background-repeat: repeat-x;
+    background-position: left center;
+    cursor: text;
+  }
+  .item:not(.complete) .leader { opacity: 0.3; }
+
+  .price {
+    flex: 0 0 auto;
+    text-align: right;
+  }
+
+  .unit {
+    flex: 0 0 auto;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 1px 3px 1px 1px;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: underline dotted rgba(0,0,0,0.25);
+    text-underline-offset: 4px;
+    transition: background 0.15s;
+  }
+  .unit:hover { background: rgba(245,245,245,0.9); }
+  .unit:focus-visible { outline: none; box-shadow: 0 0 0 2px #f39c12 inset; background: #fff8dc; }
+  .item:not(.has-price) .unit { opacity: 0.35; }
+
+  /* Línea de pesos / gramajes (pescados y carnes) */
+  .note-row {
+    display: flex;
+    align-items: baseline;
+    padding-left: calc(var(--s) * 16px);
+    margin-top: calc(var(--s) * -3px);
+    font-size: calc(var(--s) * 17px);
+    font-style: italic;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .note {
+    font-size: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+    color: inherit;
+    line-height: 1.25;
+    padding: 0 1px;
+  }
+  .note-row .paren { visibility: hidden; }
+  .item.has-note .note-row .paren { visibility: visible; }
+
+  /* Botón eliminar línea (sólo pantalla) */
+  .line-remove {
+    position: absolute;
+    right: -32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #d0d4d9;
+    background: #fff;
+    color: #c0392b;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    padding: 0;
+    line-height: 1;
+  }
+  .item:hover .line-remove,
+  .item:focus-within .line-remove { opacity: 1; }
+  .line-remove:hover { background: #c0392b; color: #fff; }
+  .rows.single .line-remove { display: none; }
+
+  /* Botón añadir línea (sólo pantalla) */
+  .btn-add {
+    position: absolute;
+    right: -32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px dashed #97a3b0;
+    background: #fff;
+    color: #2c3e50;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .btn-add:hover:not(:disabled) { background: #2c3e50; color: #fff; border-color: #2c3e50; }
+  .btn-add:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ---------- PIE ---------- */
+  .foot-line {
+    margin-top: 6px;
+    text-align: center;
+  }
+  .foot-line input {
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+
+  .allergens {
+    margin-top: 6px;
+  }
+  .allergens img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Medidor para auto-ancho de inputs */
+  .meter {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+  }
+
+  /* ---------- PRINT ---------- */
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+    html, body {
+      background: white;
+      width: 210mm;
+      height: 297mm;
+    }
+    .toolbar { display: none !important; }
+    .btn-add, .line-remove { display: none !important; }
+    .page {
+      margin: 0 !important;
+      box-shadow: none !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      page-break-after: avoid;
+      page-break-inside: avoid;
+      break-after: avoid;
+      break-inside: avoid;
+      overflow: hidden !important;
+    }
+    .field:hover, .field:focus, .unit:hover, .unit:focus-visible { background: transparent; box-shadow: none; }
+    .field::placeholder { color: transparent; }
+    .unit { text-decoration: none; }
+
+    /* Plato vacío: queda la línea en blanco */
+    .item.is-empty { visibility: hidden; }
+    .item:not(.complete) .leader { visibility: hidden; }
+    .item:not(.has-price) .unit { visibility: hidden; }
+    .item:not(.has-note) .note-row { display: none; }
+  }
+
+  /* ---------- RESPONSIVE (sólo pantalla pequeña; .printing = A4 al imprimir) ---------- */
+  @media screen and (max-width: 900px) {
+    body:not(.printing) .page { width: 100%; height: auto; min-height: 100vh; margin: 0; padding: 16px; box-shadow: none; }
+    body.pergamino:not(.printing) .page > .frame { display: none; }
+    body:not(.printing) .brand { font-size: 26px; }
+    body:not(.printing) .title-input { font-size: 28px; letter-spacing: 5px; padding-left: 9px; }
+    body:not(.printing) .subtitle-input { font-size: 17px; letter-spacing: 3px; padding-left: 5px; margin-top: -2px; }
+    body:not(.printing) .logo-img { height: 50px; }
+    body:not(.printing) .menu-inner { max-width: none; padding-right: 30px; }
+    body:not(.printing) .line-remove,
+    body:not(.printing) .btn-add { right: -30px; }
+    body:not(.printing) .line-remove { opacity: 1; }
+    .toolbar { flex-wrap: wrap; padding: 8px 12px; }
+    .toolbar .title { display: none; }
+    .toolbar .hint { order: 3; flex: 1 1 100%; font-size: 12px; }
+    .btn { font-size: 15px; padding: 6px 12px; }
+    .btn-print { font-size: 16px; padding: 6px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BARRA SUPERIOR -->
+<div class="toolbar">
+  <div class="title">FORTALEZA 1786 · SUGERENCIAS</div>
+  <div class="hint">✍️ Clic para escribir · clic en <strong>€</strong> → €/kg, €/ud… · <strong>+</strong> añade platos · se guarda solo</div>
+  <div class="buttons">
+    <button class="btn btn-style" id="btn-style" type="button">📄 Clásico</button>
+    <button class="btn btn-clear" id="btn-clear" type="button">🗑 LIMPIAR</button>
+    <button class="btn btn-print" id="btn-print" type="button">🖨️ IMPRIMIR</button>
+  </div>
+</div>
+
+<!-- PÁGINA -->
+<div class="page" id="page">
+
+  <!-- MARCO (estilo pergamino) -->
+  <svg class="frame" viewBox="0 0 210 297" preserveAspectRatio="none" aria-hidden="true">
+    <path class="f-outer" d="M12 6 H198 A6 6 0 0 0 204 12 V285 A6 6 0 0 0 198 291 H12 A6 6 0 0 0 6 285 V12 A6 6 0 0 0 12 6 Z"/>
+    <path class="f-inner" d="M13.75 8 H196.25 A8 8 0 0 0 202 13.75 V283.25 A8 8 0 0 0 196.25 289 H13.75 A8 8 0 0 0 8 283.25 V13.75 A8 8 0 0 0 13.75 8 Z"/>
+    <circle class="f-dot" cx="6" cy="6" r="1.2"/>
+    <circle class="f-dot" cx="204" cy="6" r="1.2"/>
+    <circle class="f-dot" cx="6" cy="291" r="1.2"/>
+    <circle class="f-dot" cx="204" cy="291" r="1.2"/>
+  </svg>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-box">
+      <img src="logo.jpeg" class="logo-img logo-clasico" alt="Fortaleza 1786">
+      <img src="logo-pergamino.png" class="logo-img logo-perg" alt="Fortaleza 1786">
+      <div class="brand">FORTALEZA 1786</div>
+    </div>
+    <div class="qr-box">
+      <div>menú</div>
+      <img src="download.png" alt="QR">
+      <div>digital</div>
+    </div>
+  </div>
+
+  <!-- TÍTULO -->
+  <div class="title-block">
+    <input type="text" class="field title-input" id="title-input" placeholder="SUGERENCIAS" aria-label="Título">
+    <input type="text" class="field subtitle-input" id="subtitle-input" placeholder="GOMENDIOAK" aria-label="Título en euskera">
+    <svg class="divider" viewBox="0 0 260 20" aria-hidden="true">
+      <path d="M2 10 L106 9.2 L106 10.8 Z" fill="currentColor"/>
+      <path d="M258 10 L154 9.2 L154 10.8 Z" fill="currentColor"/>
+      <circle cx="113" cy="10" r="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="147" cy="10" r="4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M130 1 L134.5 10 L130 19 L125.5 10 Z" fill="currentColor"/>
+    </svg>
+    <div class="date-line" id="fecha"></div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="menu-content" id="menu-content">
+    <div class="menu-inner" id="menu-inner"></div>
+  </div>
+
+  <!-- PIE -->
+  <div class="foot-line">
+    <input type="text" class="field" id="footer-input" placeholder="Precios con IVA incluido" aria-label="Pie de página">
+  </div>
+
+  <!-- ALÉRGENOS -->
+  <div class="allergens">
+    <img src="alergenos.png" alt="Información de alérgenos">
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- Fecha ----------
+  const fecha = new Date();
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  document.getElementById('fecha').textContent =
+    dias[fecha.getDay()].charAt(0).toUpperCase() + dias[fecha.getDay()].slice(1) +
+    ', ' + fecha.getDate() + ' de ' + meses[fecha.getMonth()] + ' de ' + fecha.getFullYear();
+
+  // ---------- Config ----------
+  const UNITS = ['€', '€/kg', '€/ud', '€/ración'];
+  const SECTIONS = [
+    { id: 'e',  title: 'ENTRANTES',         def: 4, max: 8, note: false,
+      ph: [], phMore: 'Entrante' },
+    { id: 'pc', title: 'PESCADOS Y CARNES', def: 4, max: 8, note: true,
+      ph: ['Rodaballo', 'Rape', 'Lagarto de cerdo'], phMore: 'Pescado o carne',
+      units: ['€/kg', '€', '€'] },
+    { id: 'd',  title: 'POSTRE',            def: 4, max: 6, note: false,
+      ph: ['Tarta de la abuela', 'Tarta de queso horneada', 'Flan de huevo', 'Profiteroles'], phMore: 'Postre' },
+  ];
+  const MIN_COUNT = 1;
+  const DEFAULT_TITLE = 'SUGERENCIAS';
+  const DEFAULT_SUBTITLE = 'GOMENDIOAK';
+  const DEFAULT_FOOTER = 'Precios con IVA incluido';
+  // Prefijo propio: en file:// todas las páginas comparten localStorage con el Menú del Día
+  const STORE_KEY = 'sugerencias_v1';
+
+  const page    = document.getElementById('page');
+  const content = document.getElementById('menu-content');
+  const inner   = document.getElementById('menu-inner');
+  const narrow  = window.matchMedia('screen and (max-width: 900px)');
+
+  // ---------- Estado / persistencia ----------
+  const str = v => (typeof v === 'string' ? v : '');
+
+  function emptyRow(sec, i) {
+    return { n: '', p: '', u: (sec.units && sec.units[i]) || '€', w: '' };
+  }
+
+  function defaultState() {
+    const sections = {};
+    SECTIONS.forEach(sec => {
+      sections[sec.id] = {
+        title: sec.title,
+        rows: Array.from({ length: sec.def }, (_, i) => emptyRow(sec, i)),
+      };
+    });
+    return { style: 'clasico', title: DEFAULT_TITLE, subtitle: DEFAULT_SUBTITLE, footer: DEFAULT_FOOTER, sections };
+  }
+
+  function loadState() {
+    const st = defaultState();
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { raw = null; }
+    if (!raw || typeof raw !== 'object') return st;
+    if (raw.style === 'pergamino') st.style = 'pergamino';
+    if (typeof raw.title === 'string') st.title = raw.title;
+    if (typeof raw.subtitle === 'string') st.subtitle = raw.subtitle;
+    if (typeof raw.footer === 'string') st.footer = raw.footer;
+    SECTIONS.forEach(sec => {
+      const r = raw.sections && raw.sections[sec.id];
+      if (!r) return;
+      if (typeof r.title === 'string') st.sections[sec.id].title = r.title;
+      if (Array.isArray(r.rows) && r.rows.length) {
+        st.sections[sec.id].rows = r.rows.slice(0, sec.max).map(x => ({
+          n: str(x && x.n), p: str(x && x.p), w: str(x && x.w),
+          u: x && UNITS.includes(x.u) ? x.u : '€',
+        }));
+      }
+    });
+    return st;
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* sin almacenamiento */ }
+  }
+
+  let state = loadState();
+
+  // ---------- Precio: acepta "49", "49 €/kg", "40 eur", "16.5", "12/ud", "S/M"... ----------
+  const UNIT_PATTERNS = [
+    [/\/\s*kg\.?$/i, '€/kg'],
+    [/\/\s*(ud|uds|unidad|unid|u|pieza|pza|pz)\.?$/i, '€/ud'],
+    [/\/\s*(raci[oó]n|rac)\.?$/i, '€/ración'],
+  ];
+
+  function normalizePrice(raw, unit) {
+    let p = raw.trim();
+    let u = unit;
+    for (const [re, val] of UNIT_PATTERNS) {
+      if (re.test(p)) { u = val; p = p.replace(re, '').trim(); break; }
+    }
+    p = p.replace(/(€|euros?|eur)\s*$/i, '').replace(/^€\s*/, '').trim();
+    const m = p.match(/^(\d+)(?:[.,](\d{1,2}))?$/);
+    if (m) {
+      const dec = m[2] ? m[2].padEnd(2, '0') : '';
+      p = dec && dec !== '00' ? m[1] + ',' + dec : m[1];
+    }
+    return { p, u };
+  }
+
+  // ---------- Auto-ancho de inputs ----------
+  const meter = document.createElement('span');
+  meter.className = 'meter';
+  document.body.appendChild(meter);
+
+  function autosize(input) {
+    const cs = getComputedStyle(input);
+    meter.style.fontFamily = cs.fontFamily;
+    meter.style.fontSize = cs.fontSize;
+    meter.style.fontWeight = cs.fontWeight;
+    meter.style.fontStyle = cs.fontStyle;
+    meter.style.letterSpacing = cs.letterSpacing;
+    meter.textContent = input.value || input.placeholder || ' ';
+    // margen extra por el trazo del texto; la nota (sin trazo) va pegada al paréntesis
+    const slack = input.classList.contains('note') ? 1 : 4;
+    const w = meter.getBoundingClientRect().width +
+      parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + slack;
+    input.style.width = Math.ceil(w) + 'px';
+  }
+
+  const sizeAll = () => page.querySelectorAll('.autosize').forEach(autosize);
+
+  // ---------- Render ----------
+  function el(tag, className, attrs) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (attrs) Object.assign(node, attrs);
+    return node;
+  }
+
+  function refreshItem(item, row) {
+    const hasName = !!row.n.trim();
+    const hasPrice = !!row.p.trim();
+    const hasNote = !!row.w.trim();
+    item.classList.toggle('has-name', hasName);
+    item.classList.toggle('has-price', /\d/.test(row.p));
+    item.classList.toggle('has-note', hasNote);
+    item.classList.toggle('complete', hasName && hasPrice);
+    item.classList.toggle('is-empty', !hasName && !hasPrice && !hasNote);
+  }
+
+  function buildItem(sec, row, index) {
+    const item = el('div', 'item');
+    const line = el('div', 'line-row');
+
+    const name = el('input', 'field name autosize', {
+      type: 'text',
+      value: row.n,
+      placeholder: (sec.ph[index] || sec.phMore) + '…',
+    });
+    name.setAttribute('aria-label', 'Plato');
+    name.addEventListener('input', () => {
+      row.n = name.value; save(); autosize(name); refreshItem(item, row);
+    });
+
+    const leader = el('span', 'leader');
+    leader.addEventListener('click', () => name.focus());
+
+    const price = el('input', 'field price autosize', { type: 'text', value: row.p, placeholder: '0,00' });
+    price.setAttribute('aria-label', 'Precio');
+
+    const unit = el('button', 'unit', { type: 'button', textContent: row.u });
+    unit.title = 'Clic para cambiar: ' + UNITS.join(' · ');
+
+    price.addEventListener('input', () => {
+      row.p = price.value; save(); autosize(price); refreshItem(item, row);
+    });
+    price.addEventListener('blur', () => {
+      const norm = normalizePrice(price.value, row.u);
+      row.p = norm.p; row.u = norm.u;
+      price.value = row.p; unit.textContent = row.u;
+      save(); autosize(price); refreshItem(item, row);
+    });
+    unit.addEventListener('click', () => {
+      row.u = UNITS[(UNITS.indexOf(row.u) + 1) % UNITS.length];
+      unit.textContent = row.u;
+      save();
+    });
+
+    const remove = el('button', 'line-remove', { type: 'button', textContent: '×', title: 'Eliminar esta línea' });
+    remove.setAttribute('aria-label', 'Eliminar línea');
+    remove.addEventListener('click', () => removeRow(sec, index));
+
+    line.append(name, leader, price, unit, remove);
+    item.appendChild(line);
+
+    if (sec.note) {
+      const noteRow = el('div', 'note-row');
+      const note = el('input', 'field note autosize', {
+        type: 'text',
+        value: row.w,
+        placeholder: index === 0 ? 'pesos de las piezas, ej. 1200 g, 1350 g' : 'pesos / piezas (opcional)',
+      });
+      note.setAttribute('aria-label', 'Pesos o detalle');
+      note.addEventListener('input', () => {
+        row.w = note.value; save(); autosize(note); refreshItem(item, row);
+      });
+      noteRow.append(el('span', 'paren', { textContent: '(' }), note, el('span', 'paren', { textContent: ')' }));
+      item.appendChild(noteRow);
+    }
+
+    refreshItem(item, row);
+    return item;
+  }
+
+  function buildSection(sec) {
+    const data = state.sections[sec.id];
+    const section = el('section', 'section');
+    section.dataset.id = sec.id;
+
+    const head = el('div', 'section-head');
+    const title = el('input', 'field section-title autosize', { type: 'text', value: data.title, placeholder: sec.title });
+    title.setAttribute('aria-label', 'Título de sección');
+    title.addEventListener('input', () => { data.title = title.value; save(); autosize(title); });
+
+    const add = el('button', 'btn-add', { type: 'button', textContent: '+', title: 'Añadir plato' });
+    add.disabled = data.rows.length >= sec.max;
+    add.addEventListener('click', () => addRow(sec));
+
+    head.append(el('span', 'rule rule-l'), title, el('span', 'rule rule-r'), add);
+
+    const rows = el('div', 'rows');
+    rows.classList.toggle('single', data.rows.length <= MIN_COUNT);
+    data.rows.forEach((row, i) => rows.appendChild(buildItem(sec, row, i)));
+
+    section.append(head, rows);
+    return section;
+  }
+
+  function render() {
+    inner.innerHTML = '';
+    SECTIONS.forEach(sec => inner.appendChild(buildSection(sec)));
+  }
+
+  function addRow(sec) {
+    const rows = state.sections[sec.id].rows;
+    if (rows.length >= sec.max) return;
+    rows.push(emptyRow(sec, rows.length));
+    save();
+    render();
+    fit();
+    const names = inner.querySelectorAll('.section[data-id="' + sec.id + '"] .name');
+    if (names.length) names[names.length - 1].focus();
+  }
+
+  function removeRow(sec, index) {
+    const rows = state.sections[sec.id].rows;
+    if (rows.length <= MIN_COUNT) return;
+    rows.splice(index, 1);
+    save();
+    render();
+    fit();
+  }
+
+  // ---------- Auto-ajuste: la carta siempre cabe en un A4 ----------
+  function fit() {
+    page.style.setProperty('--extra-gap', '0px');
+    page.style.setProperty('--s', '1');
+    if (!narrow.matches || document.body.classList.contains('printing')) {
+      let s = 1;
+      while (s > 0.6 && inner.offsetHeight > content.clientHeight) {
+        s = Math.round((s - 0.02) * 100) / 100;
+        page.style.setProperty('--s', String(s));
+      }
+      const spare = content.clientHeight - inner.offsetHeight;
+      if (spare > 0) {
+        page.style.setProperty('--extra-gap', Math.min(28, spare / (SECTIONS.length + 1)) + 'px');
+      }
+    }
+    sizeAll();
+  }
+
+  // ---------- Título y pie ----------
+  const titleInput = document.getElementById('title-input');
+  const subtitleInput = document.getElementById('subtitle-input');
+  const footerInput = document.getElementById('footer-input');
+
+  function syncHeaderFooter() {
+    titleInput.value = state.title;
+    subtitleInput.value = state.subtitle;
+    footerInput.value = state.footer;
+  }
+  titleInput.addEventListener('input', () => { state.title = titleInput.value; save(); });
+  subtitleInput.addEventListener('input', () => { state.subtitle = subtitleInput.value; save(); });
+  footerInput.addEventListener('input', () => { state.footer = footerInput.value; save(); });
+
+  // ---------- Enter = siguiente campo ----------
+  page.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    const fields = Array.from(page.querySelectorAll('input.field'));
+    const next = fields[fields.indexOf(e.target) + 1];
+    if (next) next.focus(); else e.target.blur();
+  });
+
+  // ---------- Estilo ----------
+  const styleBtn = document.getElementById('btn-style');
+  function applyStyle() {
+    const perg = state.style === 'pergamino';
+    document.body.classList.toggle('pergamino', perg);
+    styleBtn.textContent = perg ? '📜 Pergamino' : '📄 Clásico';
+    styleBtn.title = 'Cambiar estilo (ahora: ' + (perg ? 'Pergamino' : 'Clásico') + ')';
+  }
+  styleBtn.addEventListener('click', () => {
+    state.style = state.style === 'pergamino' ? 'clasico' : 'pergamino';
+    save();
+    applyStyle();
+    fit();
+  });
+
+  // ---------- Imprimir ----------
+  function blurActive() {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  }
+  document.getElementById('btn-print').addEventListener('click', () => { blurActive(); window.print(); });
+  // Al imprimir desde una ventana estrecha, se recalcula con la geometría A4
+  window.addEventListener('beforeprint', () => {
+    blurActive();
+    document.body.classList.add('printing');
+    fit();
+  });
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing');
+    fit();
+  });
+
+  // ---------- Limpiar ----------
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    if (!confirm('¿Seguro que quieres borrar todas las sugerencias?')) return;
+    const style = state.style;
+    state = defaultState();
+    state.style = style;
+    save();
+    syncHeaderFooter();
+    render();
+    fit();
+  });
+
+  // ---------- Init ----------
+  applyStyle();
+  syncHeaderFooter();
+  render();
+  fit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  window.addEventListener('load', fit);
+  window.addEventListener('resize', fit);
+})();
+</script>
+
+</body>
+</html>
