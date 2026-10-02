@@ -96,21 +96,6 @@
     color: white;
   }
 
-  .btn-sync {
-    background: #3d566e;
-    color: white;
-    font-size: 16px;
-    padding: 8px 16px;
-    border: 1px solid rgba(255,255,255,0.25);
-  }
-  .btn-sync[data-status="ok"]    { background: #1e6b47; }
-  .btn-sync[data-status="error"],
-  .btn-sync[data-status="auth"]  { background: #b9770e; }
-
-  @media screen and (max-width: 1300px) {
-    .toolbar .title { display: none; }
-  }
-
   /* ---------- PÁGINA A4 ---------- */
   .page {
     width: 210mm;
@@ -562,7 +547,6 @@
   <div class="title">FORTALEZA 1786 · SUGERENCIAS</div>
   <div class="hint">✍️ Clic para escribir · clic en <strong>€</strong> → €/kg, €/ud… · <strong>+</strong> añade platos · se guarda solo</div>
   <div class="buttons">
-    <button class="btn btn-sync" id="btn-sync" type="button">🔑 Conectar GitHub</button>
     <button class="btn btn-style" id="btn-style" type="button">📄 Clásico</button>
     <button class="btn btn-clear" id="btn-clear" type="button">🗑 LIMPIAR</button>
     <button class="btn btn-print" id="btn-print" type="button">🖨️ IMPRIMIR</button>
@@ -677,14 +661,14 @@
         rows: Array.from({ length: sec.def }, (_, i) => emptyRow(sec, i)),
       };
     });
-    // savedAt = momento de la última edición real (0 = nunca editado)
-    return { style: 'clasico', title: DEFAULT_TITLE, subtitle: DEFAULT_SUBTITLE, footer: DEFAULT_FOOTER, sections, savedAt: 0 };
+    return { style: 'clasico', title: DEFAULT_TITLE, subtitle: DEFAULT_SUBTITLE, footer: DEFAULT_FOOTER, sections };
   }
 
-  function normalizeState(raw) {
+  function loadState() {
     const st = defaultState();
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { raw = null; }
     if (!raw || typeof raw !== 'object') return st;
-    if (typeof raw.savedAt === 'number') st.savedAt = raw.savedAt;
     if (raw.style === 'pergamino') st.style = 'pergamino';
     if (typeof raw.title === 'string') st.title = raw.title;
     if (typeof raw.subtitle === 'string') st.subtitle = raw.subtitle;
@@ -703,25 +687,9 @@
     return st;
   }
 
-  function loadState() {
-    let raw = null;
-    try { raw = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { raw = null; }
-    return normalizeState(raw);
-  }
-
-  function persistLocal() {
+  function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* sin almacenamiento */ }
   }
-
-  // Cada edición: guarda en el navegador y programa el guardado en GitHub
-  function save() {
-    state.savedAt = Date.now();
-    persistLocal();
-    scheduleSync();
-  }
-
-  const hasContent = st => SECTIONS.some(sec =>
-    st.sections[sec.id].rows.some(r => r.n.trim() || r.p.trim() || r.w.trim()));
 
   let state = loadState();
 
@@ -985,188 +953,11 @@
     fit();
   });
 
-  // ---------- Guardado en GitHub ----------
-  // Los datos van en la rama "datos" (no en main) para no reconstruir GitHub Pages en cada cambio.
-  // Escribir requiere un token (fine-grained, sólo este repo, Contents: lectura y escritura)
-  // guardado en este navegador. Sin token, la página igualmente carga la última versión guardada.
-  const GH = { owner: 'RazvanTDF', repo: 'sugerencias', branch: 'datos', path: 'datos.json' };
-  const GH_URL = 'https://api.github.com/repos/' + GH.owner + '/' + GH.repo + '/contents/' + GH.path;
-  const TOKEN_KEY = 'sugerencias_gh_token';
-  const syncBtn = document.getElementById('btn-sync');
-  const sync = { sha: null, timer: null, retry: null, busy: false, dirty: false, again: false, lastCheck: 0, status: '' };
-
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
-  }
-  function setToken(t) {
-    try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) { /* sin almacenamiento */ }
-  }
-
-  const STATUS = {
-    off:     ['🔑 Conectar GitHub', 'Los cambios se guardan sólo en este equipo. Clic para guardarlos también en GitHub.'],
-    loading: ['☁️ Cargando…',       'Buscando la última versión en GitHub'],
-    saving:  ['☁️ Guardando…',      'Guardando en GitHub'],
-    ok:      ['☁️ Guardado ✓',      'Todo guardado en GitHub. Clic para comprobar si hay cambios.'],
-    error:   ['⚠️ Sin guardar',     'No se pudo conectar con GitHub. Se reintenta solo; clic para reintentar ya.'],
-    auth:    ['🔑 Token no válido', 'El token no funciona o no tiene permiso de escritura. Clic para poner uno nuevo.'],
-  };
-  function setStatus(kind) {
-    sync.status = kind;
-    syncBtn.textContent = STATUS[kind][0];
-    syncBtn.title = STATUS[kind][1];
-    syncBtn.dataset.status = kind;
-  }
-
-  function b64encode(text) {
-    let bin = '';
-    new TextEncoder().encode(text).forEach(b => { bin += String.fromCharCode(b); });
-    return btoa(bin);
-  }
-  function b64decode(b64) {
-    const bin = atob(b64.replace(/\s/g, ''));
-    return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
-  }
-
-  function ghHeaders() {
-    const h = { Accept: 'application/vnd.github+json' };
-    const t = getToken();
-    if (t) h.Authorization = 'Bearer ' + t;
-    return h;
-  }
-
-  class AuthError extends Error {}
-
-  async function fetchRemote() {
-    const res = await fetch(GH_URL + '?ref=' + GH.branch, { headers: ghHeaders(), cache: 'no-store' });
-    if (res.status === 404) return { sha: null, data: null };
-    if (res.status === 401) throw new AuthError();
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    return { sha: j.sha, data: JSON.parse(b64decode(j.content)) };
-  }
-
-  async function putRemote(keepalive) {
-    const put = sha => {
-      const body = {
-        message: 'Sugerencias ' + new Date().toLocaleString('es-ES'),
-        content: b64encode(JSON.stringify(state, null, 2)),
-        branch: GH.branch,
-      };
-      if (sha) body.sha = sha;
-      return fetch(GH_URL, {
-        method: 'PUT',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, ghHeaders()),
-        body: JSON.stringify(body),
-        keepalive: !!keepalive,
-      });
-    };
-    let res = await put(sync.sha);
-    if (res.status === 409 || res.status === 422) {
-      // Otro equipo guardó entre medias: gana el último que guarda
-      sync.sha = (await fetchRemote()).sha;
-      res = await put(sync.sha);
-    }
-    if (res.status === 401 || res.status === 403 || res.status === 404) throw new AuthError();
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    sync.sha = (await res.json()).content.sha;
-  }
-
-  function scheduleSync() {
-    if (!getToken()) { setStatus('off'); return; }
-    sync.dirty = true;
-    setStatus('saving');
-    clearTimeout(sync.timer);
-    sync.timer = setTimeout(flushSync, 1500);
-  }
-
-  async function flushSync(keepalive) {
-    clearTimeout(sync.timer);
-    clearTimeout(sync.retry);
-    if (!sync.dirty || !getToken()) return;
-    if (sync.busy) { sync.again = true; return; }
-    sync.busy = true;
-    sync.dirty = false;
-    setStatus('saving');
-    try {
-      await putRemote(keepalive === true);
-      setStatus(sync.dirty ? 'saving' : 'ok');
-    } catch (e) {
-      sync.dirty = true;
-      if (e instanceof AuthError) {
-        setStatus('auth');
-      } else {
-        setStatus('error');
-        sync.retry = setTimeout(flushSync, 15000);
-      }
-    } finally {
-      sync.busy = false;
-      if (sync.again) { sync.again = false; flushSync(); }
-    }
-  }
-
-  function applyRemote(data) {
-    state = normalizeState(data);
-    persistLocal();
-    applyStyle();
-    syncHeaderFooter();
-    render();
-    fit();
-  }
-
-  // Trae la versión de GitHub si es más nueva; si la de este equipo es más nueva, la sube
-  async function reconcile() {
-    if (sync.busy || sync.dirty) return;
-    sync.lastCheck = Date.now();
-    setStatus('loading');
-    try {
-      const r = await fetchRemote();
-      if (sync.dirty) return;   // se editó mientras cargaba: manda lo local
-      sync.sha = r.sha;
-      const remoteAt = (r.data && r.data.savedAt) || 0;
-      if (r.data && remoteAt > state.savedAt) {
-        applyRemote(r.data);
-      } else if (getToken() && (!r.data || state.savedAt > remoteAt || (remoteAt === 0 && hasContent(state)))) {
-        if (!state.savedAt) { state.savedAt = Date.now(); persistLocal(); }
-        sync.dirty = true;
-        await flushSync();
-        return;
-      }
-      setStatus(getToken() ? 'ok' : 'off');
-    } catch (e) {
-      setStatus(e instanceof AuthError ? 'auth' : (getToken() ? 'error' : 'off'));
-    }
-  }
-
-  async function connect() {
-    const t = prompt('Pega aquí el token de GitHub (empieza por «github_pat_»).\nSólo hace falta una vez en cada equipo.', '');
-    if (t === null) return;
-    setToken(t.trim());
-    sync.dirty = false;
-    if (!getToken()) { setStatus('off'); return; }
-    await reconcile();
-  }
-
-  syncBtn.addEventListener('click', () => {
-    if (!getToken() || sync.status === 'auth') connect();
-    else if (sync.dirty) flushSync();
-    else reconcile();
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      if (sync.dirty) flushSync(true);
-    } else if (Date.now() - sync.lastCheck > 30000) {
-      reconcile();
-    }
-  });
-
   // ---------- Init ----------
   applyStyle();
   syncHeaderFooter();
   render();
   fit();
-  setStatus(getToken() ? 'loading' : 'off');
-  reconcile();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   window.addEventListener('load', fit);
   window.addEventListener('resize', fit);
