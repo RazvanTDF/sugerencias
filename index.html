@@ -488,6 +488,203 @@
     white-space: pre;
   }
 
+
+  /* ---------- REDES SOCIALES (nuevo) ---------- */
+  .btn-social {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 150;
+    background: linear-gradient(45deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888);
+    color: white;
+    font-size: 19px;
+    padding: 11px 24px;
+    border-radius: 999px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .btn-social:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+  .badge-new {
+    display: none;
+    position: absolute;
+    top: -13px;
+    right: -16px;
+    background: #f1c40f;
+    color: #2c3e50;
+    font-family: 'Cinzel', serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    pointer-events: none;
+    animation: nuevo-pulse 1.6s ease-in-out infinite;
+  }
+  .btn-social.show-new .badge-new { display: block; }
+  @keyframes nuevo-pulse {
+    0%, 100% { transform: rotate(5deg) scale(1); }
+    50%      { transform: rotate(5deg) scale(1.1); }
+  }
+  @media (prefers-reduced-motion: reduce) { .badge-new { animation: none; transform: rotate(5deg); } }
+
+  /* Captura de imagen: igual que al imprimir */
+  body.snap .unit { text-decoration: none; }
+  body.snap .item.is-empty { visibility: hidden; }
+  body.snap .item:not(.complete) .leader { visibility: hidden; }
+  body.snap .item:not(.has-price) .unit { visibility: hidden; }
+  body.snap .item:not(.has-note) .note-row { display: none; }
+
+  .sm-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(20,26,33,0.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .sm-backdrop[hidden] { display: none; }
+  .sm-box {
+    position: relative;
+    background: #fff;
+    color: #1f2a36;
+    border-radius: 14px;
+    width: min(940px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 26px;
+    padding: 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+  .sm-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 26px;
+    line-height: 1;
+    color: #6b7580;
+    cursor: pointer;
+  }
+  .sm-close:hover { background: #eef0f3; color: #1f2a36; }
+  .sm-preview {
+    position: relative;
+    background: #eef0f3;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+    padding: 14px;
+  }
+  .sm-preview img {
+    display: block;
+    max-width: 100%;
+    max-height: 64vh;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .sm-preview img[hidden] { display: none; }
+  .sm-status { font-size: 18px; font-style: italic; color: #5b6672; text-align: center; padding: 20px; }
+  .sm-status.err { color: #c0392b; font-style: normal; }
+  .sm-title { font-family: 'Cinzel', serif; font-size: 22px; margin: 2px 0 4px; color: #2c3e50; letter-spacing: 1px; }
+  .sm-sub { margin: 0 0 18px; font-size: 17px; color: #5b6672; }
+  .sm-label { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 1.5px; color: #7a8590; margin: 0 0 10px; }
+  .sm-formats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+  .sm-fmt {
+    position: relative;
+    border: 2px solid #dde1e6;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 6px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-family: inherit;
+    color: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .sm-fmt:hover { border-color: #97a3b0; }
+  .sm-fmt.on { border-color: #2c3e50; background: #f4f6f8; }
+  .sm-fmt:focus-visible { outline: none; box-shadow: 0 0 0 3px #f39c12; }
+  .sm-shape { height: 44px; border: 2px solid currentColor; border-radius: 4px; margin-bottom: 5px; opacity: 0.55; }
+  .sm-fmt.on .sm-shape { opacity: 1; background: rgba(44,62,80,0.08); }
+  .sm-fmt b { font-size: 19px; }
+  .sm-fmt small { font-size: 14px; color: #6b7580; line-height: 1.15; text-align: center; }
+  .sm-tag {
+    position: absolute;
+    top: -9px;
+    background: #27ae60;
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sm-actions { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; }
+  .sm-net {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 6px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.15s;
+  }
+  .sm-net:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+  .sm-net:disabled { opacity: 0.45; cursor: wait; }
+  .sm-net svg { width: 26px; height: 26px; }
+  .sm-meta { background: linear-gradient(110deg, #1877f2 0%, #1877f2 38%, #c13584 72%, #f77737 100%); }
+  .sm-icons { display: flex; gap: 8px; }
+  .sm-tt { background: #111; }
+  .sm-download {
+    margin-top: 10px;
+    width: 100%;
+    padding: 9px;
+    background: none;
+    border: 1.5px dashed #b6bec7;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2c3e50;
+    cursor: pointer;
+  }
+  .sm-download:hover:not(:disabled) { background: #f4f6f8; }
+  .sm-download:disabled { opacity: 0.45; cursor: wait; }
+  .sm-hint { font-size: 16px; color: #5b6672; margin: 14px 0 0; line-height: 1.35; }
+  .sm-done { font-size: 16px; color: #1e8449; font-weight: 700; margin: 8px 0 0; min-height: 1.3em; }
+  @media (max-width: 760px) {
+    .sm-box { grid-template-columns: 1fr; padding: 18px 16px; gap: 14px; }
+    .sm-preview { min-height: 200px; }
+    .sm-preview img { max-height: 40vh; }
+    .sm-formats { margin-bottom: 16px; }
+  }
+  @media print { .sm-backdrop, .btn-social { display: none !important; } }
+  @media screen and (max-width: 900px) {
+    .btn-social { left: 12px; bottom: 12px; font-size: 16px; padding: 9px 18px; }
+    .badge-new { right: auto; left: 10px; font-size: 9.5px; padding: 3px 6px; white-space: nowrap; }
+  }
+
   /* ---------- PRINT ---------- */
   @media print {
     @page { size: A4 portrait; margin: 0; }
@@ -961,6 +1158,331 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   window.addEventListener('load', fit);
   window.addEventListener('resize', fit);
+})();
+</script>
+
+<!-- REDES SOCIALES (nuevo) -->
+<button class="btn btn-social" id="btn-social" type="button">📲 REDES<span class="badge-new">¡NUEVO! · de Razvan</span></button>
+
+<div class="sm-backdrop" id="sm-modal" hidden>
+  <div class="sm-box" role="dialog" aria-modal="true" aria-labelledby="sm-title">
+    <button class="sm-close" id="sm-close" type="button" aria-label="Cerrar">×</button>
+    <div class="sm-preview">
+      <img id="sm-img" alt="Vista previa de la imagen" hidden>
+      <div class="sm-status" id="sm-status">Preparando imagen…</div>
+    </div>
+    <div>
+      <h2 class="sm-title" id="sm-title">Publicar en redes</h2>
+      <p class="sm-sub">La hoja de hoy, lista como imagen para Instagram, Facebook y TikTok.</p>
+
+      <p class="sm-label">1 · FORMATO</p>
+      <div class="sm-formats">
+        <button class="sm-fmt" type="button" data-fmt="post">
+          <span class="sm-shape" style="aspect-ratio: 4 / 5"></span>
+          <b>Post</b><small>4:5 · feed de<br>Instagram y Facebook</small>
+        </button>
+        <button class="sm-fmt" type="button" data-fmt="mid">
+          <span class="sm-tag">RECOMENDADO</span>
+          <span class="sm-shape" style="aspect-ratio: 3 / 4"></span>
+          <b>Universal</b><small>3:4 · vale para<br>las tres redes</small>
+        </button>
+        <button class="sm-fmt" type="button" data-fmt="story">
+          <span class="sm-shape" style="aspect-ratio: 9 / 16"></span>
+          <b>Story</b><small>9:16 · Stories,<br>Reels y TikTok</small>
+        </button>
+      </div>
+
+      <p class="sm-label">2 · PUBLICAR EN</p>
+      <div class="sm-actions">
+        <button class="sm-net sm-meta" type="button" data-net="meta" disabled>
+          <span class="sm-icons">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.9v3h2.6V21h3z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </span>
+          Facebook + Instagram
+        </button>
+        <button class="sm-net sm-tt" type="button" data-net="tiktok" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.4 2.2 1.8 3.6 4 3.8v3.1c-1.5 0-2.9-.4-4-1.2v6.1c0 3.3-2.6 5.6-5.7 5.6-3.1 0-5.6-2.5-5.6-5.6 0-3.3 2.9-5.9 6.4-5.5v3.2c-1.6-.4-3.2.8-3.2 2.4 0 1.3 1.1 2.4 2.4 2.4 1.4 0 2.5-1 2.5-2.6V3h3.2z"/></svg>
+          TikTok
+        </button>
+      </div>
+      <button class="sm-download" id="sm-download" type="button" disabled>⬇ Sólo descargar la imagen</button>
+      <p class="sm-done" id="sm-done" aria-live="polite"></p>
+      <p class="sm-hint" id="sm-hint"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Redes sociales (nuevo): la hoja como imagen para Instagram, Facebook y TikTok ----------
+(function () {
+  'use strict';
+
+  const LIB_URL = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js';
+  const NEW_KEY = 'sugerencias_nuevo_redes';
+  const FORMATS = {
+    post:  { w: 1080, h: 1350, name: 'post' },
+    mid:   { w: 1080, h: 1440, name: 'universal' },
+    story: { w: 1080, h: 1920, name: 'story' },
+  };
+  // Dónde se crea la publicación desde el ordenador
+  const DEST = {
+    meta:   { url: 'https://business.facebook.com/latest/composer', label: 'Meta Business Suite', how: 'añade la foto descargada y marca Facebook e Instagram' },
+    tiktok: { url: 'https://www.tiktok.com/tiktokstudio/upload', label: 'TikTok Studio', how: 'sube la foto descargada' },
+  };
+
+  const btn      = document.getElementById('btn-social');
+  const modal    = document.getElementById('sm-modal');
+  const img      = document.getElementById('sm-img');
+  const status   = document.getElementById('sm-status');
+  const hint     = document.getElementById('sm-hint');
+  const done     = document.getElementById('sm-done');
+  const dlBtn    = document.getElementById('sm-download');
+  const fmtBtns  = Array.from(modal.querySelectorAll('.sm-fmt'));
+  const netBtns  = Array.from(modal.querySelectorAll('.sm-net'));
+  const page     = document.getElementById('page');
+  const isPhone  = window.matchMedia('(pointer: coarse)').matches;
+
+  // ---------- Etiqueta «¡NUEVO!»: sólo la primera vez ----------
+  let seen = false;
+  try { seen = localStorage.getItem(NEW_KEY) === '1'; } catch (e) { /* sin almacenamiento */ }
+  if (/[?&]nuevo\b/.test(location.search)) seen = false;   // ?nuevo para volver a verla
+  if (!seen) {
+    btn.classList.add('show-new');
+    try { localStorage.setItem(NEW_KEY, '1'); } catch (e) { /* sin almacenamiento */ }
+  }
+
+  // ---------- Librería (se carga sólo al abrir) ----------
+  let libPromise = null;
+  function loadLib() {
+    if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
+    if (!libPromise) {
+      libPromise = new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = LIB_URL;
+        sc.onload = () => resolve(window.htmlToImage);
+        sc.onerror = () => { libPromise = null; reject(new Error('No se pudo cargar la librería')); };
+        document.head.appendChild(sc);
+      });
+    }
+    return libPromise;
+  }
+
+  // ---------- Fuentes de Google incrustadas en la imagen (sólo latín) ----------
+  function toDataURL(blob) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = reject;
+      fr.readAsDataURL(blob);
+    });
+  }
+  async function googleFontCSS() {
+    const link = document.querySelector('link[href*="fonts.googleapis.com/css"]');
+    if (!link) return '';
+    const css = await (await fetch(link.href)).text();
+    const blocks = (css.match(/@font-face\s*{[^}]*}/g) || []).filter(b => /U\+0000-00FF/i.test(b));
+    const parts = await Promise.all(blocks.map(async b => {
+      const m = b.match(/url\((https:[^)]+)\)/);
+      if (!m) return '';
+      const data = await toDataURL(await (await fetch(m[1])).blob());
+      return b.replace(m[1], data);
+    }));
+    return parts.join('\n');
+  }
+
+  // ---------- Captura de la hoja A4 (igual que al imprimir) ----------
+  let fontCSS = null;
+  async function capturePage() {
+    const lib = await loadLib();
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    window.dispatchEvent(new Event('beforeprint'));   // geometría A4 + auto-ajuste
+    document.body.classList.add('snap');
+    const inputs = Array.from(page.querySelectorAll('input[placeholder]'));
+    const ph = inputs.map(i => i.placeholder);
+    inputs.forEach(i => { i.placeholder = ''; });
+    try {
+      const opts = {
+        pixelRatio: 2,
+        width: page.offsetWidth,
+        height: page.offsetHeight,
+        style: { margin: '0', boxShadow: 'none' },
+        filter: n => !(n.classList && (n.classList.contains('btn-add') || n.classList.contains('line-remove'))),
+      };
+      if (!fontCSS) {
+        try { fontCSS = await googleFontCSS(); }
+        catch (e) { fontCSS = await lib.getFontEmbedCSS(page, opts); }
+      }
+      opts.fontEmbedCSS = fontCSS;
+      return await lib.toCanvas(page, opts);
+    } finally {
+      inputs.forEach((i, k) => { i.placeholder = ph[k]; });
+      document.body.classList.remove('snap');
+      window.dispatchEvent(new Event('afterprint'));
+    }
+  }
+
+  // ---------- Composición en el formato de la red ----------
+  function setSpacing(ctx, v) { if ('letterSpacing' in ctx) ctx.letterSpacing = v; }
+
+  function compose(shot, key) {
+    const f = FORMATS[key];
+    const c = document.createElement('canvas');
+    c.width = f.w; c.height = f.h;
+    const x = c.getContext('2d');
+
+    const g = x.createRadialGradient(f.w / 2, f.h * 0.45, 60, f.w / 2, f.h / 2, f.h * 0.8);
+    g.addColorStop(0, '#6e1b21');
+    g.addColorStop(1, '#260a0c');
+    x.fillStyle = g;
+    x.fillRect(0, 0, f.w, f.h);
+
+    const pad = 48;
+    // En Story la interfaz de Instagram/TikTok tapa arriba y abajo
+    const top = key === 'story' ? 250 : pad;
+    const bottom = key === 'story' ? 284 : pad;
+    const maxW = f.w - 2 * pad, maxH = f.h - top - bottom;
+    const r = shot.width / shot.height;
+    let w = maxW, h = w / r;
+    if (h > maxH) { h = maxH; w = h * r; }
+    const px = Math.round((f.w - w) / 2), py = Math.round(top + (maxH - h) / 2);
+
+    x.save();
+    x.shadowColor = 'rgba(0,0,0,0.5)';
+    x.shadowBlur = 44;
+    x.shadowOffsetY = 14;
+    x.fillStyle = '#fff';
+    x.fillRect(px, py, w, h);
+    x.restore();
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(shot, px, py, w, h);
+
+    if (key === 'story') {
+      x.fillStyle = '#f3e6cc';
+      x.textAlign = 'center';
+      x.textBaseline = 'middle';
+      x.font = '700 62px Cinzel, serif';
+      setSpacing(x, '6px');
+      x.fillText('FORTALEZA 1786', f.w / 2, 168);
+      x.font = 'italic 600 40px "Cormorant Garamond", serif';
+      setSpacing(x, '1px');
+      x.fillStyle = 'rgba(243,230,204,0.85)';
+      x.fillText(document.getElementById('fecha').textContent, f.w / 2, py + h + 70);
+    }
+    return c;
+  }
+
+  // ---------- Estado del panel ----------
+  let fmt = 'mid';
+  let shotP = null;
+  let blob = null;
+  let objUrl = null;
+  let busy = 0;
+
+  function setReady(ready) {
+    netBtns.forEach(b => { b.disabled = !ready; });
+    dlBtn.disabled = !ready;
+  }
+
+  function fileName() {
+    const d = new Date();
+    const ymd = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    return 'sugerencias-' + ymd + '-' + FORMATS[fmt].name + '.png';
+  }
+
+  async function build() {
+    const ticket = ++busy;
+    setReady(false);
+    done.textContent = '';
+    status.className = 'sm-status';
+    status.textContent = 'Preparando imagen…';
+    status.hidden = false;
+    img.hidden = true;
+    try {
+      if (!shotP) shotP = capturePage();
+      let shot;
+      try { shot = await shotP; } catch (err) { shotP = null; throw err; }
+      const canvas = compose(shot, fmt);
+      const b = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      if (ticket !== busy) return;
+      if (!b) throw new Error('toBlob');
+      blob = b;
+      if (objUrl) URL.revokeObjectURL(objUrl);
+      objUrl = URL.createObjectURL(blob);
+      img.src = objUrl;
+      img.hidden = false;
+      status.hidden = true;
+      setReady(true);
+    } catch (e) {
+      if (ticket !== busy) return;
+      console.error(e);
+      status.className = 'sm-status err';
+      status.textContent = 'No se pudo crear la imagen. Abre la página desde el enlace de GitHub Pages (no como archivo) y con internet.';
+    }
+  }
+
+  function selectFormat(key) {
+    fmt = key;
+    fmtBtns.forEach(b => {
+      const on = b.dataset.fmt === key;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    build();
+  }
+
+  function download() {
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = fileName();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function publish(net) {
+    if (!blob) return;
+    const file = new File([blob], fileName(), { type: 'image/png' });
+    // Móvil: menú de compartir del teléfono → la imagen va directa a la app
+    if (isPhone && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).catch(() => { /* cancelado */ });
+      return;
+    }
+    // Ordenador: se descarga y se abre la página para crear la publicación
+    const d = DEST[net];
+    download();
+    window.open(d.url, '_blank', 'noopener');
+    done.textContent = '✔ Imagen descargada. En la pestaña de ' + d.label + ': ' + d.how + '.';
+  }
+
+  function open() {
+    btn.classList.remove('show-new');
+    shotP = null;                      // siempre la versión actual de la hoja
+    hint.textContent = isPhone
+      ? 'Se abre el menú del móvil: elige Instagram, Facebook o TikTok y la imagen ya va dentro de la publicación nueva.'
+      : 'Se descarga la imagen y se abre la página para crear la publicación: allí la subes desde Descargas. Con Meta Business Suite publicas en Facebook e Instagram a la vez.';
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    selectFormat(fmt);
+    const on = fmtBtns.find(b => b.dataset.fmt === fmt);
+    if (on) on.focus();
+  }
+
+  function close() {
+    busy++;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    btn.focus();
+  }
+
+  btn.addEventListener('click', open);
+  document.getElementById('sm-close').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+  fmtBtns.forEach(b => b.addEventListener('click', () => { if (b.dataset.fmt !== fmt) selectFormat(b.dataset.fmt); }));
+  netBtns.forEach(b => b.addEventListener('click', () => publish(b.dataset.net)));
+  dlBtn.addEventListener('click', () => { download(); done.textContent = '✔ Imagen descargada.'; });
 })();
 </script>
 
